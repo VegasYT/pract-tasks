@@ -67,7 +67,8 @@ def threaded_fetch(args: tuple) -> int:
     """Выполняет запрос из потока."""
     idx, url = args
     response = requests.get(url, timeout=10)
-    print(f"  Запрос {idx:>2}: {response.status_code}  [поток: {threading.current_thread().name}]")
+    thread_name = threading.current_thread().name
+    print(f"  Запрос {idx:>2}: {response.status_code}  [поток: {thread_name}]")
     return response.status_code
 
 
@@ -116,13 +117,16 @@ if __name__ == "__main__":
     print(f"I/O-bound: {N} HTTP-запросов к {URL}")
     print("=" * 50)
 
-    t_sync        = run_sync()
-    t_async       = run_async()
-    t_threaded    = run_threaded()
-    t_multiproc   = run_multiprocess()
+    t_sync = run_sync()
+    t_async = run_async()
+    t_threaded = run_threaded()
+    t_multiproc = run_multiprocess()
 
     print("\n" + "=" * 50)
     print(f"  Синхронный:        {t_sync:.3f} сек")
-    print(f"  Асинхронный:       {t_async:.3f} сек  (ускорение x{t_sync / t_async:.1f})")
-    print(f"  Многопоточный:     {t_threaded:.3f} сек  (ускорение x{t_sync / t_threaded:.1f})")
-    print(f"  Многопроцессорный: {t_multiproc:.3f} сек  (ускорение x{t_sync / t_multiproc:.1f})")
+    x_async = t_sync / t_async
+    x_thr = t_sync / t_threaded
+    x_mp = t_sync / t_multiproc
+    print(f"  Асинхронный:       {t_async:.3f} сек  (ускорение x{x_async:.1f})")
+    print(f"  Многопоточный:     {t_threaded:.3f} сек  (ускорение x{x_thr:.1f})")
+    print(f"  Многопроцессорный: {t_multiproc:.3f} сек  (ускорение x{x_mp:.1f})")
