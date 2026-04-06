@@ -14,7 +14,9 @@ def sum_numbers(params: Annotated[CalcQueryParams, Depends()]) -> CalcResponse:
 
 
 @router.get("/multiply", response_model=CalcResponse, summary="Умножение")
-def multiply_numbers(params: Annotated[CalcQueryParams, Depends()]) -> CalcResponse:
+def multiply_numbers(
+    params: Annotated[CalcQueryParams, Depends()],
+) -> CalcResponse:
     return CalcResponse(result=calc.multiply(params.a, params.b))
 
 
@@ -24,5 +26,7 @@ def multiply_numbers(params: Annotated[CalcQueryParams, Depends()]) -> CalcRespo
     summary="Деление",
     responses={400: {"description": "Деление на ноль"}},
 )
-def divide_numbers(params: Annotated[CalcQueryParams, Depends()]) -> CalcResponse:
+def divide_numbers(
+    params: Annotated[CalcQueryParams, Depends()],
+) -> CalcResponse:
     return CalcResponse(result=calc.divide(params.a, params.b))

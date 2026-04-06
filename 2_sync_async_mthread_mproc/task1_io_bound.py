@@ -35,7 +35,9 @@ def run_sync() -> float:
 # =======================
 # Асинхронный подход
 # =======================
-async def async_fetch(session: aiohttp.ClientSession, url: str, idx: int) -> int:
+async def async_fetch(
+    session: aiohttp.ClientSession, url: str, idx: int
+) -> int:
     async with session.get(url) as response:
         print(f"  Запрос {idx:>2}: {response.status}")
         return response.status
@@ -127,6 +129,6 @@ if __name__ == "__main__":
     x_async = t_sync / t_async
     x_thr = t_sync / t_threaded
     x_mp = t_sync / t_multiproc
-    print(f"  Асинхронный:       {t_async:.3f} сек  (ускорение x{x_async:.1f})")
-    print(f"  Многопоточный:     {t_threaded:.3f} сек  (ускорение x{x_thr:.1f})")
-    print(f"  Многопроцессорный: {t_multiproc:.3f} сек  (ускорение x{x_mp:.1f})")
+    print(f"  Асинхронный:       {t_async:.3f} сек  (x{x_async:.1f})")
+    print(f"  Многопоточный:     {t_threaded:.3f} сек  (x{x_thr:.1f})")
+    print(f"  Многопроцессорный: {t_multiproc:.3f} сек  (x{x_mp:.1f})")

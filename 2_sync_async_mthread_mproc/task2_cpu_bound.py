@@ -60,7 +60,7 @@ def run_multiprocess() -> float:
 
     elapsed = time.perf_counter() - start
     print(
-        f"[Многопроцессорный] Время: {elapsed:.2f} сек  (ядер CPU: {cpu_count})"
+        f"[Многопроцессорный] Время: {elapsed:.2f} сек (ядер CPU: {cpu_count})"
     )
     return elapsed
 
@@ -78,5 +78,5 @@ if __name__ == "__main__":
     print(f"  Синхронный:        {t_sync:.2f} сек")
     x_thr = t_sync / t_threaded
     x_mp = t_sync / t_multiproc
-    print(f"  Многопоточный:     {t_threaded:.2f} сек  (ускорение x{x_thr:.2f})")
-    print(f"  Многопроцессорный: {t_multiproc:.2f} сек  (ускорение x{x_mp:.2f})")
+    print(f"  Многопоточный:     {t_threaded:.2f} сек  (x{x_thr:.2f})")
+    print(f"  Многопроцессорный: {t_multiproc:.2f} сек  (x{x_mp:.2f})")

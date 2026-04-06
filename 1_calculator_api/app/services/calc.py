@@ -18,6 +18,9 @@ def divide(a: float, b: float) -> float:
     if b == 0:
         raise HTTPException(
             status_code=400,
-            detail="Деление на ноль невозможно. Параметр 'b' должен быть ненулевым.",
+            detail=(
+                "Деление на ноль невозможно. "
+                "Параметр 'b' должен быть ненулевым."
+            ),
         )
     return _round(a / b)
