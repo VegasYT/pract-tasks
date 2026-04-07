@@ -1,3 +1,4 @@
+"""Точка входа FastAPI-приложения."""
 from fastapi import FastAPI
 
 from app.api.v1.routers import calc as calc_router
@@ -5,11 +6,16 @@ from app.config import settings
 
 
 def create_app() -> FastAPI:
+    """Создать и настроить экземпляр приложения.
+
+    Returns:
+        Настроенный экземпляр FastAPI.
+    """
     application = FastAPI(
-        title=settings.app_name
+        title=settings.app_name,
     )
 
-    application.include_router(calc_router.router, prefix="/v1")
+    application.include_router(calc_router.router, prefix='/v1')
 
     return application
 
