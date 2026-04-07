@@ -1,26 +1,57 @@
+"""Бизнес-логика калькулятора."""
 from fastapi import HTTPException
 
+_ROUND_PRECISION = 10
+_HTTP_BAD_REQUEST = 400
 
-def _round(value: float) -> float:
+
+def _round(number: float) -> float:
     # Срезаем погрешность float-арифметики (0.1 + 0.2 = 0.30000000000000004)
-    return round(value, 10)
+    return round(number, _ROUND_PRECISION)
 
 
-def add(a: float, b: float) -> float:
-    return _round(a + b)
+def add(first: float, second: float) -> float:
+    """Сложить два числа.
+
+    Args:
+        first: первое слагаемое.
+        second: второе слагаемое.
+
+    Returns:
+        Сумма first и second.
+    """
+    return _round(first + second)
 
 
-def multiply(a: float, b: float) -> float:
-    return _round(a * b)
+def multiply(first: float, second: float) -> float:
+    """Умножить два числа.
+
+    Args:
+        first: множитель.
+        second: множитель.
+
+    Returns:
+        Произведение first и second.
+    """
+    return _round(first * second)
 
 
-def divide(a: float, b: float) -> float:
-    if b == 0:
+def divide(first: float, second: float) -> float:
+    """Разделить первое число на второе.
+
+    Args:
+        first: делимое.
+        second: делитель.
+
+    Returns:
+        Частное first и second.
+
+    Raises:
+        HTTPException: если second равен нулю.
+    """
+    if second == 0:
         raise HTTPException(
-            status_code=400,
-            detail=(
-                "Деление на ноль невозможно. "
-                "Параметр 'b' должен быть ненулевым."
-            ),
+            status_code=_HTTP_BAD_REQUEST,
+            detail='Деление на ноль. Параметр b должен быть ненулевым.',
         )
-    return _round(a / b)
+    return _round(first / second)

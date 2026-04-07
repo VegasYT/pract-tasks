@@ -1,5 +1,11 @@
 [flake8]
 max-line-length = 79
+extend-default-select = WPS
+# WPS421 - print разрешён в демо-скриптах
+# WPS305 - f-строки разрешены
+# WPS226 - повторяющиеся строковые литералы разрешены в скриптах
+# WPS202 - допускаем больше 7 членов модуля для демо-скриптов
+extend-ignore = WPS421,WPS305,WPS226,WPS202
 
 exclude =
     .git,

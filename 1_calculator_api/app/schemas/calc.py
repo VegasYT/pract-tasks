@@ -1,10 +1,15 @@
+"""Схемы данных для калькулятора."""
 from pydantic import BaseModel
 
 
 class CalcQueryParams(BaseModel):
-    a: float
-    b: float
+    """Входные параметры запроса."""
+
+    first: float
+    second: float
 
 
 class CalcResponse(BaseModel):
-    result: float
+    """Ответ с результатом вычисления."""
+
+    total: float
