@@ -1,0 +1,21 @@
+[flake8]
+extend-default-select = WPS
+max-line-length = 79
+max-module-members = 10
+per-file-ignores =
+    # assert в тестах - стандартная практика pytest
+    tests/*.py: S101
+    tests/**/*.py: S101
+    # Depends() в FastAPI - устоявшийся паттерн, не magic
+    app/api/v1/endpoints/*.py: B008, WPS404, WPS229
+    # nested function и много переменных в фикстурах - норма для conftest
+    tests/conftest.py: WPS430, WPS442, WPS210, WPS358
+    # миграции - boilerplate alembic
+    migrations/env.py: WPS226
+exclude =
+    migrations/
+ignore =
+    # DAR - docstring аргументы, избыточно для внутреннего кода
+    DAR101, DAR201, DAR301
+    # isort конфликт с WPS стилем импортов
+    I001, I005
