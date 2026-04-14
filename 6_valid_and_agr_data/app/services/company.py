@@ -5,9 +5,9 @@ import io
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.repositories import company as company_repo
-from app.repositories import county as county_repo
-from app.repositories import region as region_repo
+from app.repositories.company import company_repository as company_repo
+from app.repositories.county import county_repository as county_repo
+from app.repositories.region import region_repository as region_repo
 
 # Граничный столбец: начиная с него все поля уходят в bankruptcy_data
 _BANKRUPTCY_COLUMN = (
@@ -127,8 +127,12 @@ async def load_companies(
     """
     records = _parse_csv(file_bytes)
 
+    # Сначала фиксируем основные данные
     await company_repo.clear_table(session)
     await company_repo.bulk_insert(session, records)
+    await session.commit()
+
+    # Затем считаем и фиксируем агрегаты
     await _save_aggregates(session, records)
     await session.commit()
     return len(records)

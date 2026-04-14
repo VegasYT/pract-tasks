@@ -14,6 +14,7 @@ per-file-ignores =
     migrations/env.py: WPS226
 exclude =
     migrations/
+    tests/
 ignore =
     # DAR - docstring аргументы, избыточно для внутреннего кода
     DAR101, DAR201, DAR301
