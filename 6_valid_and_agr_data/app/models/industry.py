@@ -1,39 +1,37 @@
-"""ORM модели агрегированных данных по федеральным округам."""
+"""ORM модели агрегированных данных по отраслям."""
 
-from sqlalchemy import Float, ForeignKey, Integer, String
+from sqlalchemy import Float, ForeignKey, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
 
-class CountyDataORM(Base):
-    """Агрегированные показатели компаний в разрезе федерального округа."""
+class IndustryDataORM(Base):
+    """Агрегированные показатели компаний в разрезе отрасли."""
 
-    __tablename__ = 'county_data'
+    __tablename__ = 'industry_data'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    district: Mapped[str] = mapped_column(String, nullable=False)
-    current_business_value: Mapped[float] = mapped_column(
-        Float, nullable=True,
-    )
+    industry: Mapped[str] = mapped_column(Text, nullable=False)
+    current_business_value: Mapped[float] = mapped_column(Float, nullable=True)
     liquidation_value: Mapped[float] = mapped_column(Float, nullable=True)
     creditor_return_rate: Mapped[float] = mapped_column(Float, nullable=True)
     working_capital_need: Mapped[float] = mapped_column(Float, nullable=True)
     profit_before_tax: Mapped[float] = mapped_column(Float, nullable=True)
 
 
-class CommonInfoCounty(Base):
-    """Агрегированные счётчики компаний в разрезе федерального округа."""
+class CommonInfoIndustry(Base):
+    """Агрегированные счётчики компаний в разрезе отрасли."""
 
-    __tablename__ = 'common_info_county'
+    __tablename__ = 'common_info_industry'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    county_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey('county_data.id'), nullable=False, unique=True,
+    industry_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey('industry_data.id'), nullable=False, unique=True,
     )
-    district: Mapped[str] = mapped_column(String, nullable=False)
+    industry: Mapped[str] = mapped_column(Text, nullable=False)
 
-    # Всего компаний по округу
+    # Всего компаний по отрасли
     total_companies: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0,
     )
@@ -58,4 +56,4 @@ class CommonInfoCounty(Base):
         Integer, nullable=False, default=0,
     )
 
-    county = relationship('CountyDataORM', backref='common_info')
+    industry_ref = relationship('IndustryDataORM', backref='common_info')

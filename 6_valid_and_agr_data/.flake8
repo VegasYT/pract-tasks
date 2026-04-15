@@ -12,6 +12,8 @@ per-file-ignores =
     tests/conftest.py: WPS430, WPS442, WPS210, WPS358
     # миграции - boilerplate alembic
     migrations/env.py: WPS226
+    # сервис агрегации содержит много функций по числу агрегируемых сущностей
+    app/services/company.py: WPS202
 exclude =
     migrations/
     tests/

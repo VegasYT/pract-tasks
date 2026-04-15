@@ -9,8 +9,9 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from app.config import settings
 from app.db.base import Base
 from app.models import company  # noqa: F401 - регистрируем модели в метаданных
-from app.models import county  # noqa: F401
-from app.models import region  # noqa: F401
+from app.models import county  # noqa: F401 - CountyDataORM + CommonInfoCounty
+from app.models import industry  # noqa: F401 - IndustryDataORM + CommonInfoIndustry
+from app.models import region  # noqa: F401 - RegionDataORM + CommonInfoRegion
 
 config = context.config
 

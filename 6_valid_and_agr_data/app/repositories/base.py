@@ -2,7 +2,7 @@
 
 from typing import Generic, TypeVar
 
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import Base
@@ -11,7 +11,7 @@ ModelType = TypeVar('ModelType', bound=Base)  # noqa: WPS462
 
 
 class BaseRepository(Generic[ModelType]):
-    """Базовый репозиторий: очистка и массовая вставка записей"""
+    """Базовый репозиторий: очистка и массовая вставка записей."""
 
     def __init__(self, model: type[ModelType]) -> None:
         """Инициализирует репозиторий с конкретной ORM-моделью.
@@ -34,10 +34,18 @@ class BaseRepository(Generic[ModelType]):
         session: AsyncSession,
         records: list[dict],
     ) -> None:
-        """Массово вставляет записи в таблицу модели
+        """Массово вставляет записи в таблицу модели.
 
         Args:
             session: Асинхронная сессия SQLAlchemy.
             records: Список словарей с данными для вставки.
         """
         session.add_all([self._model(**record) for record in records])
+
+    async def get_all(self, session: AsyncSession) -> list[ModelType]:
+        """Возвращает все записи из таблицы модели.
+
+        Args:
+            session: Асинхронная сессия SQLAlchemy.
+        """
+        return (await session.execute(select(self._model))).scalars().all()
