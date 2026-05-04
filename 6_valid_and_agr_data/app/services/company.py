@@ -24,15 +24,6 @@ _BANKRUPTCY_COLUMN = (
     'возбуждено производство по делу о несостоятельности (банкротстве)'
 )
 
-# Поля для агрегации (сумма по группе)
-_AGR_FIELDS = (  # noqa: WPS407
-    'current_business_value',
-    'liquidation_value',
-    'creditor_return_rate',
-    'working_capital_need',
-    'profit_before_tax',
-)
-
 # Маппинг CSV-столбцов на поля ORM (до границы)
 _COLUMN_MAP = {  # noqa: WPS407
     'ID': 'inn',
@@ -90,151 +81,86 @@ def _parse_csv(file_bytes: bytes) -> list[dict]:
     ]
 
 
-def _aggregate_records(
-    records: list[dict],
-    group_key: str,
-) -> list[dict]:
-    """Агрегирует записи по заданному полю, суммируя финансовые показатели.
-
-    Args:
-        records: Список словарей с данными компаний.
-        group_key: Имя поля для группировки.
-
-    Returns:
-        Список агрегированных записей с суммами по каждой группе.
-    """
-    data_frame = pd.DataFrame(records)
-    grouped = data_frame.groupby(group_key)[list(_AGR_FIELDS)].sum()
-    return grouped.reset_index().to_dict(orient='records')
-
-
-def _build_common_info_row(
-    group_key: str,
-    group_val: str,
-    group_df: pd.DataFrame,
-) -> dict:
-    """Строит словарь счётчиков для одной группы CommonInfo."""
-    no_tax = group_df['tax_debt'].fillna(0) == 0
-    no_enforcement = group_df['enforcement_debt'].fillna(0) == 0
-    return {
-        group_key: group_val,
-        'total_companies': len(group_df),
-        'companies_with_business_value': int(
-            (group_df['current_business_value'].fillna(0) > 0).sum(),
-        ),
-        'companies_with_profit': int(
-            (group_df['profit_before_tax'].fillna(0) > 0).sum(),
-        ),
-        'companies_without_debt': int(
-            (no_tax & no_enforcement).sum(),  # noqa: WPS465
-        ),
-        'companies_with_solvency_rank': int(
-            (group_df['solvency_rank'].fillna(0) > 0).sum(),
-        ),
-        'companies_with_roa': int(
-            (group_df['creditor_return_rate'].fillna(0) != 0).sum(),
-        ),
-    }
-
-
-def _compute_common_info(
-    records: list[dict],
-    group_key: str,
-) -> list[dict]:
-    """Вычисляет счётчики компаний для CommonInfo-таблицы.
-
-    Args:
-        records: Список словарей с данными компаний.
-        group_key: Поле для группировки.
-
-    Returns:
-        Список словарей с агрегированными счётчиками.
-    """
-    data_frame = pd.DataFrame(records)
-    return [
-        _build_common_info_row(group_key, group_val, group_df)
-        for group_val, group_df in data_frame.groupby(group_key)
-    ]
-
-
 async def _save_region_aggregates(  # noqa: WPS217
     session: AsyncSession,
-    records: list[dict],
 ) -> None:
     """Сохраняет агрегаты и CommonInfo по субъектам РФ."""
+    await common_info_region_repo.clear_table(session)
     await region_repo.clear_table(session)
     await region_repo.bulk_insert(
-        session, _aggregate_records(records, _KEY_SUBJECT),
+        session,
+        await company_repo.aggregate_by(session, _KEY_SUBJECT),
     )
     await session.flush()
 
-    region_rows = await region_repo.get_all(session)
-    region_id_map = {region.subject: region.id for region in region_rows}
+    region_id_map = {
+        region.subject: region.id
+        for region in await region_repo.get_all(session)
+    }
 
-    common_rows = _compute_common_info(records, _KEY_SUBJECT)
+    common_rows = await company_repo.compute_common_info(session, _KEY_SUBJECT)
     for common_row in common_rows:
         common_row['region_id'] = region_id_map.get(common_row[_KEY_SUBJECT])
-    await common_info_region_repo.clear_table(session)
     await common_info_region_repo.bulk_insert(session, common_rows)
 
 
 async def _save_county_aggregates(  # noqa: WPS217
     session: AsyncSession,
-    records: list[dict],
 ) -> None:
     """Сохраняет агрегаты и CommonInfo по федеральным округам."""
+    await common_info_county_repo.clear_table(session)
     await county_repo.clear_table(session)
     await county_repo.bulk_insert(
-        session, _aggregate_records(records, _KEY_DISTRICT),
+        session,
+        await company_repo.aggregate_by(session, _KEY_DISTRICT),
     )
     await session.flush()
 
-    county_rows = await county_repo.get_all(session)
-    county_id_map = {county.district: county.id for county in county_rows}
+    county_id_map = {
+        county.district: county.id
+        for county in await county_repo.get_all(session)
+    }
 
-    common_rows = _compute_common_info(records, _KEY_DISTRICT)
+    common_rows = await company_repo.compute_common_info(
+        session, _KEY_DISTRICT,
+    )
     for common_row in common_rows:
         common_row['county_id'] = county_id_map.get(common_row[_KEY_DISTRICT])
-    await common_info_county_repo.clear_table(session)
     await common_info_county_repo.bulk_insert(session, common_rows)
 
 
 async def _save_industry_aggregates(  # noqa: WPS217
     session: AsyncSession,
-    records: list[dict],
 ) -> None:
     """Сохраняет агрегаты и CommonInfo по отраслям."""
+    await common_info_industry_repo.clear_table(session)
     await industry_repo.clear_table(session)
     await industry_repo.bulk_insert(
-        session, _aggregate_records(records, _KEY_INDUSTRY),
+        session,
+        await company_repo.aggregate_by(session, _KEY_INDUSTRY),
     )
     await session.flush()
 
-    industry_rows = await industry_repo.get_all(session)
-    industry_id_map = {ind.industry: ind.id for ind in industry_rows}
+    industry_id_map = {
+        ind.industry: ind.id
+        for ind in await industry_repo.get_all(session)
+    }
 
-    common_rows = _compute_common_info(records, _KEY_INDUSTRY)
+    common_rows = await company_repo.compute_common_info(
+        session, _KEY_INDUSTRY,
+    )
     for common_row in common_rows:
         common_row['industry_id'] = industry_id_map.get(
             common_row[_KEY_INDUSTRY],
         )
-    await common_info_industry_repo.clear_table(session)
     await common_info_industry_repo.bulk_insert(session, common_rows)
 
 
-async def _save_aggregates(
-    session: AsyncSession,
-    records: list[dict],
-) -> None:
-    """Сохраняет агрегированные данные по регионам, округам и отраслям.
-
-    Args:
-        session: Асинхронная сессия SQLAlchemy.
-        records: Список словарей с данными компаний.
-    """
-    await _save_region_aggregates(session, records)
-    await _save_county_aggregates(session, records)
-    await _save_industry_aggregates(session, records)
+async def _save_aggregates(session: AsyncSession) -> None:
+    """Сохраняет агрегированные данные по регионам, округам и отраслям."""
+    await _save_region_aggregates(session)
+    await _save_county_aggregates(session)
+    await _save_industry_aggregates(session)
 
 
 async def load_companies(
@@ -258,6 +184,6 @@ async def load_companies(
     await session.commit()
 
     # Затем считаем и фиксируем агрегаты
-    await _save_aggregates(session, records)
+    await _save_aggregates(session)
     await session.commit()
     return len(records)
