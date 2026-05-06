@@ -11,3 +11,4 @@ ENV/
 .venv
 .vscode/
 .pytest_cache/
+*.csv

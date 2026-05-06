@@ -1,0 +1,9 @@
+aiokafka
+fastapi
+uvicorn[standard]
+sqlalchemy[asyncio]
+asyncpg
+pydantic-settings
+python-multipart
+wemake-python-styleguide
+flake8
