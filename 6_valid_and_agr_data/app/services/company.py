@@ -93,14 +93,7 @@ async def _save_region_aggregates(  # noqa: WPS217
     )
     await session.flush()
 
-    region_id_map = {
-        region.subject: region.id
-        for region in await region_repo.get_all(session)
-    }
-
-    common_rows = await company_repo.compute_common_info(session, _KEY_SUBJECT)
-    for common_row in common_rows:
-        common_row['region_id'] = region_id_map.get(common_row[_KEY_SUBJECT])
+    common_rows = await common_info_region_repo.compute_from_companies(session)
     await common_info_region_repo.bulk_insert(session, common_rows)
 
 
@@ -116,16 +109,7 @@ async def _save_county_aggregates(  # noqa: WPS217
     )
     await session.flush()
 
-    county_id_map = {
-        county.district: county.id
-        for county in await county_repo.get_all(session)
-    }
-
-    common_rows = await company_repo.compute_common_info(
-        session, _KEY_DISTRICT,
-    )
-    for common_row in common_rows:
-        common_row['county_id'] = county_id_map.get(common_row[_KEY_DISTRICT])
+    common_rows = await common_info_county_repo.compute_from_companies(session)
     await common_info_county_repo.bulk_insert(session, common_rows)
 
 
@@ -141,18 +125,9 @@ async def _save_industry_aggregates(  # noqa: WPS217
     )
     await session.flush()
 
-    industry_id_map = {
-        ind.industry: ind.id
-        for ind in await industry_repo.get_all(session)
-    }
-
-    common_rows = await company_repo.compute_common_info(
-        session, _KEY_INDUSTRY,
+    common_rows = await common_info_industry_repo.compute_from_companies(
+        session,
     )
-    for common_row in common_rows:
-        common_row['industry_id'] = industry_id_map.get(
-            common_row[_KEY_INDUSTRY],
-        )
     await common_info_industry_repo.bulk_insert(session, common_rows)
 
 
