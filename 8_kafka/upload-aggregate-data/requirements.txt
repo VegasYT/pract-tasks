@@ -5,6 +5,7 @@ sqlalchemy[asyncio]
 asyncpg
 alembic
 pydantic-settings
+fastapi-users[sqlalchemy]
 python-multipart
 pandas
 pytest

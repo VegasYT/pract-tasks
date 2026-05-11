@@ -48,8 +48,8 @@ services:
     build:
       context: ./upload-aggregate-data
     env_file: ./upload-aggregate-data/.env
-    ports:
-      - "8000:8000"
+    # ports:
+    #   - "8000:8000"
     depends_on:
       db:
         condition: service_healthy

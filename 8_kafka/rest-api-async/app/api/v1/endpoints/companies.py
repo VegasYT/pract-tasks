@@ -6,7 +6,9 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.users import current_active_user
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.upload import ErrorResponseSchema
 from app.services import company as company_service
 
@@ -22,6 +24,7 @@ async def get_companies(
     page_size: int = Query(default=_DEFAULT_PAGE_SIZE, ge=1, le=100),
     region_name: str | None = Query(default=None),
     session: AsyncSession = Depends(get_db),
+    _user: User = Depends(current_active_user),
 ) -> JSONResponse:
     """Возвращает пагинированный список компаний с фильтрацией по региону."""
     logger.info(

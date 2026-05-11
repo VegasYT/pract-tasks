@@ -7,7 +7,9 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.users import current_active_user
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.upload import ErrorResponseSchema
 from app.services import aggregates as aggregates_service
 
@@ -23,6 +25,7 @@ _GROUP_REGION = 'region'  # noqa: WPS226
 async def get_financial_aggregates(
     group_by: GroupBy = Query(default=_GROUP_REGION),
     session: AsyncSession = Depends(get_db),
+    _user: User = Depends(current_active_user),
 ) -> JSONResponse:
     """Возвращает финансовые суммы по регионам, округам или отраслям."""
     logger.info('get financial aggregates, group_by=%s', group_by)
@@ -44,6 +47,7 @@ async def get_financial_aggregates(
 async def get_counts_aggregates(
     group_by: GroupBy = Query(default=_GROUP_REGION),
     session: AsyncSession = Depends(get_db),
+    _user: User = Depends(current_active_user),
 ) -> JSONResponse:
     """Возвращает счётчики компаний по регионам, округам или отраслям."""
     logger.info('get counts aggregates, group_by=%s', group_by)

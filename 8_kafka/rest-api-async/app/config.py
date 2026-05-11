@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     kafka_bootstrap_servers: str
     kafka_topic: str
 
+    secret_key: str
+    access_token_expire_seconds: int = 3600
+
     model_config = {'env_file': '.env'}
 
     @property

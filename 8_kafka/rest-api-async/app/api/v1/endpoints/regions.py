@@ -6,7 +6,9 @@ from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.users import current_active_user
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.region import RegionUpdateSchema
 from app.schemas.upload import ErrorResponseSchema
 from app.services import region as region_service
@@ -20,6 +22,7 @@ logger = logging.getLogger(__name__)
 async def delete_region(
     region_id: int,
     session: AsyncSession = Depends(get_db),
+    _user: User = Depends(current_active_user),
 ) -> JSONResponse:
     """Удаляет запись региона и связанный CommonInfoRegion по id."""
     logger.info('delete region: id=%d', region_id)
@@ -46,6 +49,7 @@ async def patch_region(
     region_id: int,
     body: RegionUpdateSchema,
     session: AsyncSession = Depends(get_db),
+    _user: User = Depends(current_active_user),
 ) -> JSONResponse:
     """Частично обновляет запись региона по id."""
     logger.info('patch region: id=%d', region_id)

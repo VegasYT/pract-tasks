@@ -3,9 +3,11 @@
 import logging
 
 from aiokafka.errors import KafkaError
-from fastapi import APIRouter, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
 
+from app.core.users import current_active_user
+from app.models.user import User
 from app.schemas.upload import ErrorResponseSchema, UploadAcceptedSchema
 from app.services import upload as upload_service
 from app.services.upload import FileTooLargeError, InvalidFileError
@@ -15,7 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 @router.post('/upload', status_code=status.HTTP_202_ACCEPTED)
-async def upload_csv(csv_file: UploadFile) -> JSONResponse:
+async def upload_csv(
+    csv_file: UploadFile,
+    _user: User = Depends(current_active_user),
+) -> JSONResponse:
     """Принимает CSV, валидирует и отправляет в Kafka для загрузки."""
     logger.info('upload request received, file: %s', csv_file.filename)
     try:

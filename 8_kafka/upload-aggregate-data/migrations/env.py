@@ -12,6 +12,7 @@ from app.models import company  # noqa: F401 - регистрируем моде
 from app.models import county  # noqa: F401 - CountyDataORM + CommonInfoCounty
 from app.models import industry  # noqa: F401 - IndustryDataORM + CommonInfoIndustry
 from app.models import region  # noqa: F401 - RegionDataORM + CommonInfoRegion
+from app.models import user  # noqa: F401 - User
 
 config = context.config
 
