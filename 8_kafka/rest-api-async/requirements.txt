@@ -8,3 +8,7 @@ python-multipart
 fastapi-users[sqlalchemy]
 wemake-python-styleguide
 flake8
+pytest
+pytest-asyncio
+httpx
+aiosqlite

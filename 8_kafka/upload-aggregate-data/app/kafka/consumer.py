@@ -11,6 +11,8 @@ from app.config import settings
 from app.db.session import async_session_maker
 from app.services import company as company_service
 
+_MAX_FETCH_MB = 20
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,7 +53,7 @@ async def run_consumer() -> None:
         bootstrap_servers=settings.kafka_bootstrap_servers,
         group_id=settings.kafka_group_id,
         auto_offset_reset='earliest',
-        max_partition_fetch_bytes=20 * 1024 * 1024,  # 20 MB
+        max_partition_fetch_bytes=_MAX_FETCH_MB * 1024 * 1024,
     )
     await consumer.start()
     logger.info('consumer started, topic: %s', settings.kafka_topic)

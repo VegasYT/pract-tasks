@@ -64,6 +64,22 @@ class RegionRepository(BaseRepository[RegionDataORM]):
         await session.flush()
         return record
 
+    async def get_avg_by_region_name(
+        self,
+        session: AsyncSession,
+        region_name: str,
+    ) -> tuple | None:
+        """JOIN region_data + common_info_region по названию субъекта.
+
+        Returns:
+            Кортеж (RegionDataORM, CommonInfoRegion) или None если не найдено.
+        """
+        join_cond = CommonInfoRegion.region_id == RegionDataORM.id
+        stmt = select(RegionDataORM, CommonInfoRegion).join(
+            CommonInfoRegion, join_cond,
+        ).where(RegionDataORM.subject == region_name)
+        return (await session.execute(stmt)).first()
+
 
 region_repository = RegionRepository(RegionDataORM)
 common_info_region_repository = BaseRepository(CommonInfoRegion)

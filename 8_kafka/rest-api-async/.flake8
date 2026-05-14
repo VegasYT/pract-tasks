@@ -9,3 +9,5 @@ ignore =
     DAR101, DAR201, DAR301, DAR401
     I001, I005
     WPS323
+exclude =
+    tests/

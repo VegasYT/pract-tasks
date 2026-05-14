@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.users import current_active_user
+from app.core.users import current_active_user, current_superuser
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.upload import ErrorResponseSchema
@@ -59,6 +59,30 @@ async def get_counts_aggregates(
         )
     except Exception as exc:
         logger.error('failed to get counts aggregates: %s', exc)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=ErrorResponseSchema(detail=str(exc)).model_dump(),
+        )
+
+
+@router.get('/aggregates/industry-percent', status_code=status.HTTP_200_OK)
+async def get_industry_percent(
+    industry_ids: list[int] = Query(..., description='Список id отраслей'),
+    session: AsyncSession = Depends(get_db),
+    _user: User = Depends(current_superuser),
+) -> JSONResponse:
+    """Возвращает процентные доли компаний по выбранным отраслям."""
+    logger.info('get industry percent: ids=%s', industry_ids)
+    try:
+        response = await aggregates_service.get_industry_percent(
+            session, industry_ids,
+        )
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=[schema.model_dump() for schema in response],
+        )
+    except Exception as exc:
+        logger.error('failed to get industry percent: %s', exc)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=ErrorResponseSchema(detail=str(exc)).model_dump(),

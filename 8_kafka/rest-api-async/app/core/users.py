@@ -5,7 +5,11 @@ from collections.abc import AsyncGenerator
 
 from fastapi import Depends
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
-from fastapi_users.authentication import AuthenticationBackend, BearerTransport, JWTStrategy
+from fastapi_users.authentication import (
+    AuthenticationBackend,
+    BearerTransport,
+    JWTStrategy,
+)
 from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,7 +19,7 @@ from app.models.user import User
 
 
 async def get_user_db(
-    session: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_db),  # noqa: B008, WPS404
 ) -> AsyncGenerator[SQLAlchemyUserDatabase, None]:
     """Dependency: адаптер БД для FastAPI Users."""
     yield SQLAlchemyUserDatabase(session, User)
@@ -27,12 +31,16 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = settings.secret_key
     verification_token_secret = settings.secret_key
 
-    async def on_after_register(self, user: User, request=None) -> None:  # noqa: WPS110
-        pass
+    async def on_after_register(  # noqa: WPS110
+        self,
+        user: User,
+        request=None,
+    ) -> None:
+        """Хук после регистрации пользователя."""
 
 
 async def get_user_manager(
-    user_db: SQLAlchemyUserDatabase = Depends(get_user_db),
+    user_db: SQLAlchemyUserDatabase = Depends(get_user_db),  # noqa: B008, WPS404, E501
 ) -> AsyncGenerator[UserManager, None]:
     """Dependency: экземпляр UserManager."""
     yield UserManager(user_db)
@@ -56,3 +64,4 @@ auth_backend = AuthenticationBackend(
 fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
 
 current_active_user = fastapi_users.current_user(active=True)
+current_superuser = fastapi_users.current_user(active=True, superuser=True)
